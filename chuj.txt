@@ -1,0 +1,111 @@
+Class Filereader
+- private:
+bool isOpen // czy plik zosta³ otwarty
+string name // nazwa
+uint32_t size
+ifstream file
+uint8* buffer
+
+public:
+filereader(string)
+~ filereader() //zwalniamy: zamykamy plik, zwalniamy bufor
+
+bool Open()
+
+bool ReadAll()
+
+uint8* GetContent() // zwraca bufor
+
+uint32 GetSize() // zwraca rozmiar
+
+bool Close()
+
+
+
+Class Filewriter
+- private:
+bool isCreated
+string name // nazwa
+uint32_t size
+ofstream file
+uint8* buffer
+
+public:
+filewriter(string, size, *buffer)
+~ filewriter() //zwalniamy: zamykamy plik, zwalniamy bufor
+
+bool Open()
+
+bool writeAll()
+
+bool Close()
+
+
+
+https://en.wikipedia.org/wiki/BMP_file_format // Ogarn¹æ nag³ówki BMP i konstrukcje pliku
+
+
+class Format
+protected:
+filereader& file;
+
+public:
+Format(const FileReader&);
+virtual bool isValid() = 0;  // id, size, number of pixels
+
+
+
+Class BMP : Format
+bool isValid();  // id, size, number of pixels
+
+
+
+class Chuj : Format
+bool isValid();  // id, size, number of pixels
+
+
+
+
+
+
+class Algorithm
+protected:
+BMP& bmp;
+Chuj chuj;
+
+public:
+virtual void compress(bool) = 0; // bool czy jest efekt szarosci
+virtual void decompress(bool) = 0; // bool czy jest efekt szarosci
+void setBmp(BMP& bmp);
+
+
+
+
+class LZ77 : Algorithm
+
+
+
+class aritmetic : Algorithm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
