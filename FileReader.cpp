@@ -7,7 +7,7 @@ FileReader::FileReader(std::string _fileName) : isOpen(false), fileName(_fileNam
 
 FileReader::~FileReader()
 {
-    // TODO Auto-generated destructor stub
+    delete [] buffer;
 }
 
 bool FileReader::open()
