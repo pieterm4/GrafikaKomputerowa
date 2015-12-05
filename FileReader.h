@@ -9,7 +9,7 @@ public:
     FileReader(std::string _fileName);
     virtual ~FileReader();
     bool open();
-    bool close();
+    void close();
     bool readAll();
     uint8_t* getContent();
     uint32_t getSize();
