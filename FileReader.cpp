@@ -25,17 +25,14 @@ bool FileReader::open()
         return isOpen = false;
 }
 
-bool FileReader::close()
+void FileReader::close()
 {
     if (isOpen)
     {
         file.close();
         isOpen = false;
         delete [] buffer;
-        return true;
     }
-
-    return false;
 }
 
 bool FileReader::readAll()
