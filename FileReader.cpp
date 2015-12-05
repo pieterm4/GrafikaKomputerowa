@@ -46,12 +46,10 @@ bool FileReader::readAll()
         buffer = new  (std::nothrow)  uint8_t[size];
 
         if ( (file.rdstate() & std::ifstream::failbit ) == 0 && size > 0 && buffer != nullptr)
-        {
             file.read((char*)buffer, size);
-
-            if (file.gcount() == size && buffer)
+            
+        if (file.gcount() == size && buffer)
                 return true;
-        }
     }
     return false;
 }
