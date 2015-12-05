@@ -9,7 +9,7 @@ public:
     FileWriter(std::string _fileName);
     virtual ~FileWriter();
     bool open();
-    bool close();
+    void close();
     bool writeAll();
     void setSize(uint32_t _size);
     void setBuffer(uint8_t *_buffer);
