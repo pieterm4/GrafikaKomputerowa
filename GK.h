@@ -18,6 +18,7 @@ class GK : public Format
 	//BitmapInfoheader
 	uint32_t HeadSizeBMP = 0x28;
 
+	uint16_t BytesPerPixel = 0x4;
 
 	//Input buffer
 	uint8_t *buffer;
