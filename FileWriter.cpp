@@ -30,15 +30,13 @@ bool FileWriter::open()
     }
 }
 
-bool FileWriter::close()
+void FileWriter::close()
 {
     if (isOpen)
     {
         file.close();
         isOpen = false;
-        return true;
     }
-    return false;
 }
 
 bool FileWriter::writeAll()
