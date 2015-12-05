@@ -20,15 +20,9 @@ bool FileReader::open()
     file.open(fileName, std::ios_base::binary | std::ios::in);
 
     if (file.is_open())
-    {
-        isOpen = true;
-        return isOpen;
-    }
+        return isOpen = true;
     else
-    {
-        isOpen = false;
-        return isOpen;
-    }
+        return isOpen = false;
 }
 
 bool FileReader::close()
@@ -52,11 +46,18 @@ bool FileReader::readAll()
         size = file.tellg();
         file.seekg(0, std::ios::beg);
 
-        buffer = new uint8_t[size];
-        file.read((char*)buffer, size);
+        if ( (file.rdstate() & std::ifstream::failbit ) == 0 && size > 0)
+        {
+            buffer = new  (std::nothrow)  uint8_t[size];
 
-        if (file.gcount() == size)
-            return true;
+            if (buffer != nullptr)
+            {
+                file.read((char*)buffer, size);
+
+                if (file.gcount() == size && buffer)
+                    return true;
+            }
+        }
     }
     return false;
 }
@@ -70,4 +71,5 @@ uint32_t FileReader::getSize()
 {
     return size;
 }
+
 
