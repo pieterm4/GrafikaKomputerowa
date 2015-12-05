@@ -1,5 +1,4 @@
 #include "FileWriter.h"
-#include<iostream>
 
 FileWriter::FileWriter(std::string _fileName) : isOpen(false), fileName(_fileName), size(0), buffer(nullptr)
 {
