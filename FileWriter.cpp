@@ -1,34 +1,59 @@
 #include "FileWriter.h"
+#include<iostream>
 
 FileWriter::FileWriter(std::string _fileName) : isOpen(false), fileName(_fileName), size(0), buffer(nullptr)
 {
-	// TODO Auto-generated constructor stub
+    // TODO Auto-generated constructor stub
 }
 
 FileWriter::~FileWriter()
 {
-	// TODO Auto-generated destructor stub
+    if (isOpen)
+    {
+        this->close();
+        isOpen = false;
+    }
 }
 
 bool FileWriter::open()
 {
-	return true;
+    file.open(fileName, std::ios_base::binary);
+
+    if (file.is_open())
+        return isOpen = true;
+    else
+        return isOpen = false;
 }
 
 bool FileWriter::close()
 {
-	return true;
+    if (isOpen)
+    {
+        file.close();
+        isOpen = false;
+        return true;
+    }
+    return false;
 }
 
 bool FileWriter::writeAll()
 {
-	return true;
+    if (isOpen && size > 0 && buffer != nullptr)
+    {
+        file.write((char*)buffer, size);
+
+        return true;
+    }
+
+    return false;
 }
 
 void FileWriter::setSize(uint32_t _size)
 {
+    size = _size;
 }
 
 void FileWriter::setBuffer(uint8_t* _buffer)
 {
+    buffer = _buffer;
 }
