@@ -11,11 +11,11 @@ public:
 	bool open();
 	bool close();
 	bool readAll();
-	uint8_t* GetContent();
+	uint8_t* getContent();
 	uint32_t getSize();
 
 private:
-	std::ifstream file;
+	std::fstream file;
 	bool isOpen;
 	std::string fileName;
 	uint32_t size;
@@ -23,3 +23,4 @@ private:
 };
 
 #endif /* FILEREADER_H_ */
+
