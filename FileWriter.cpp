@@ -19,9 +19,15 @@ bool FileWriter::open()
     file.open(fileName, std::ios_base::binary);
 
     if (file.is_open())
-        return isOpen = true;
+    {
+        isOpen = true;
+        return isOpen;
+    }
     else
-        return isOpen = false;
+    {
+        isOpen = false;
+        return isOpen;
+    }
 }
 
 bool FileWriter::close()
