@@ -43,17 +43,14 @@ bool FileReader::readAll()
         size = file.tellg();
         file.seekg(0, std::ios::beg);
 
-        if ( (file.rdstate() & std::ifstream::failbit ) == 0 && size > 0)
+        buffer = new  (std::nothrow)  uint8_t[size];
+
+        if ( (file.rdstate() & std::ifstream::failbit ) == 0 && size > 0 && buffer != nullptr)
         {
-            buffer = new  (std::nothrow)  uint8_t[size];
+            file.read((char*)buffer, size);
 
-            if (buffer != nullptr)
-            {
-                file.read((char*)buffer, size);
-
-                if (file.gcount() == size && buffer)
-                    return true;
-            }
+            if (file.gcount() == size && buffer)
+                return true;
         }
     }
     return false;
@@ -68,5 +65,4 @@ uint32_t FileReader::getSize()
 {
     return size;
 }
-
 
