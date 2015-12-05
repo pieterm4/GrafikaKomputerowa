@@ -2,35 +2,55 @@
 
 FileReader::FileReader(std::string _fileName) : isOpen(false), fileName(_fileName), size(0), buffer(nullptr)
 {
-	// TODO Auto-generated constructor stub
+    // TODO Auto-generated constructor stub
 }
 
 FileReader::~FileReader()
 {
-	// TODO Auto-generated destructor stub
+    // TODO Auto-generated destructor stub
 }
 
 bool FileReader::open()
 {
-	return true;
+    file.open(fileName, std::ios_base::binary | std::ios::in);
+
+    if (file.is_open())
+        return isOpen = true;
+    else
+        return isOpen = false;
 }
 
 bool FileReader::close()
 {
-	return true;
+    file.close();
+
+    return true;
 }
 
 bool FileReader::readAll()
 {
-	return true;
+    if (isOpen)
+    {
+        file.seekg(0, std::ios::end);
+        size = file.tellg();
+        file.seekg(0, std::ios::beg);
+
+        buffer = new uint8_t[size];
+        file.read((char*)buffer, size);
+
+        if (file.gcount() == size)
+            return true;
+    }
+
+    return false;
 }
 
-uint8_t* FileReader::GetContent()
+uint8_t* FileReader::getContent()
 {
-	return buffer;
+    return buffer;
 }
 
 uint32_t FileReader::getSize()
 {
-	return size;
+    return size;
 }
