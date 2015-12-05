@@ -5,6 +5,22 @@
 
 class GK : public Format
 {
+	private:
+	
+	//GK Header
+	uint16_t HeadNameGK = 0x474B;
+
+
+	//BitmapHeader
+	uint16_t HeadNameBM = 0x424D;
+
+
+	//BitmapInfoheader
+	uint32_t HeadSizeBMP = 0x28;
+
+
+	//Input buffer
+	uint8_t *buffer;
 public:
 	GK(FileReader& _file);
 	virtual ~GK();
