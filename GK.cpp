@@ -8,7 +8,7 @@ GK::GK(FileReader& _file)  : Format(_file)
 
 GK::~GK()
 {
-	// TODO Auto-generated destructor stub
+	delete[] buffer;
 }
 
 bool GK::isValid()
@@ -33,7 +33,12 @@ bool GK::isValid()
 	uint16_t HeaderSizeBMP2 = (temp4 << 8) | temp1;
 
 	uint32_t HeaderSizeBMP = (HeaderSizeBMP2 << 16) | HeaderSizeBMP1;
-	if (HeaderGK == HeadNameGK && HeaderBMP == HeadNameBM && HeaderSizeBMP == HeadSizeBMP)
+	temp1 = *buffer + 69;
+	temp2 = *buffer + 70;
+
+	uint16_t Deep = (temp2 << 8) | temp1;
+
+	if (HeaderGK == HeadNameGK && HeaderBMP == HeadNameBM && HeaderSizeBMP == HeadSizeBMP && Deep == BytesPerPixel)
 	{
 		return true;
 	}
