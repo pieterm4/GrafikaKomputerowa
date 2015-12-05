@@ -7,7 +7,12 @@ FileReader::FileReader(std::string _fileName) : isOpen(false), fileName(_fileNam
 
 FileReader::~FileReader()
 {
-    delete [] buffer;
+    if (isOpen)
+    {
+        this->close();
+        isOpen = false;
+        delete [] buffer;
+    }
 }
 
 bool FileReader::open()
@@ -22,9 +27,15 @@ bool FileReader::open()
 
 bool FileReader::close()
 {
-    file.close();
+    if (isOpen)
+    {
+        file.close();
+        isOpen = false;
+        delete [] buffer;
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool FileReader::readAll()
@@ -41,7 +52,6 @@ bool FileReader::readAll()
         if (file.gcount() == size)
             return true;
     }
-
     return false;
 }
 
@@ -54,3 +64,4 @@ uint32_t FileReader::getSize()
 {
     return size;
 }
+
