@@ -7,7 +7,6 @@
 #include "BMP.h"
 #include "GK.h"
 
-const static WORD BMP_MAGIC = 0x4D42;
 const static uint8_t BMP_PADDING = 0x00;
 const char * const COMRPESS = "c";
 const char * const DECOMRPESS = "d";
