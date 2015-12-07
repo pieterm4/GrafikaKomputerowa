@@ -1,47 +1,166 @@
 #include "GK.h"
 
-GK::GK(FileReader& _file)  : Format(_file)
+GK::GK(FileReader& _reader) : Format(_reader)
 {
-	buffer = _file.GetContent();
 
 }
 
-GK::~GK()
+bool GK::verify()
 {
-	delete[] buffer;
-}
-
-bool GK::isValid()
-{
-	uint8_t temp1 = *buffer;
-	uint8_t temp2 = *buffer + 1;
-	uint8_t temp3;
-	uint8_t temp4;
-
-	uint16_t HeaderGK = (temp2 << 8) | temp1;
-
-	temp1 = *buffer + 14;
-	temp2 = *buffer + 15;
-
-	uint16_t HeaderBMP = (temp2 << 8) | temp1;
-
-	temp1 = *buffer + 55;
-	temp2 = *buffer + 56;
-	temp3 = *buffer + 57;
-	temp4 = *buffer + 58;
-	uint16_t HeaderSizeBMP1 = (temp2 << 8) | temp1;
-	uint16_t HeaderSizeBMP2 = (temp4 << 8) | temp1;
-
-	uint32_t HeaderSizeBMP = (HeaderSizeBMP2 << 16) | HeaderSizeBMP1;
-	temp1 = *buffer + 69;
-	temp2 = *buffer + 70;
-
-	uint16_t Deep = (temp2 << 8) | temp1;
-
-	if (HeaderGK == HeadNameGK && HeaderBMP == HeadNameBM && HeaderSizeBMP == HeadSizeBMP && Deep == BytesPerPixel)
+	if (!reader.read<BITMAPFILEHEADER>(bfh))
 	{
-		return true;
+		return false;
+	}
+
+	if (bfh.bfType != BMP_MAGIC)
+	{
+		return false;
+	}
+
+	if (!reader.read<BITMAPINFOHEADER>(bih))
+	{
+		return false;
+	}
+
+	width = bih.biWidth;
+	height = bih.biHeight;
+	bytesPerPixel = bih.biBitCount;
+
+	if (bytesPerPixel != BYTES)
+	{
+		return false;
+	}
+
+	if (bih.biCompression != BI_RGB)
+	{
+		return false;
+	}
+
+	padding = width % 4;
+
+	if (!reader.goToOffset(bfh.bfOffBits))
+	{
+		return false;
+	}
+
+	bih.biSizeImage = width * 3 / 2;
+	if ((width * 3) % 2)
+	{
+		bih.biSizeImage++;
+	}
+	bih.biSizeImage *= height;
+
+	buffer = new (std::nothrow) int8_t[bih.biSizeImage];
+
+	if (!buffer)
+	{
+		return false;
+	}
+
+	if (!reader.read<int8_t>(*buffer, bih.biSizeImage))
+	{
+		return false;
+	}
+
+	bih.biSizeImage = (width * 3 + padding) * height;
+
+	return true;
+}
+
+uint8_t GK::getRed(uint32_t x, uint32_t y) const
+{
+	if (x >= width || y >= height)
+	{
+		return 0;
+	}
+
+	uint32_t offset = width * 3 / 2;
+	if ((width * 3) % 2)
+	{
+		offset++;
+	}
+	offset *= y;
+	offset += (x * 3 / 2);
+
+	uint8_t color = reinterpret_cast<uint8_t *>(buffer)[offset + 1];
+
+	if ((x * 3) % 2)
+	{
+		color &= 0x0F;
 	}
 	else
-		return false;
+	{
+		color &= 0xF0;
+		color >>= BYTES;
+	}
+
+	color <<= BYTES;
+
+	return color;
+}
+
+uint8_t GK::getGreen(uint32_t x, uint32_t y) const
+{
+	if (x >= width || y >= height)
+	{
+		return 0;
+	}
+
+	uint32_t offset = width * 3 / 2;
+	if ((width * 3) % 2)
+	{
+		offset++;
+	}
+	offset *= y;
+	offset += (x * 3 / 2);
+
+	uint8_t color = 0;
+
+	if ((x * 3) % 2)
+	{
+		color = reinterpret_cast<uint8_t *>(buffer)[offset + 1];
+		color &= 0xF0;
+		color >>= BYTES;
+	}
+	else
+	{
+		color = reinterpret_cast<uint8_t *>(buffer)[offset];
+		color &= 0x0F;
+	}
+
+	color <<= BYTES;
+
+	return color;
+}
+
+uint8_t GK::getBlue(uint32_t x, uint32_t y) const
+{
+	if (x >= width || y >= height)
+	{
+		return 0;
+	}
+
+	uint32_t offset = width * 3 / 2;
+	if ((width * 3) % 2)
+	{
+		offset++;
+	}
+	offset *= y;
+	offset += (x * 3 / 2);
+
+	uint8_t color = reinterpret_cast<uint8_t *>(buffer)[offset];
+
+	if ((x * 3) % 2)
+	{
+		color &= 0x0F;
+	}
+	else
+	{
+		color &= 0xF0;
+		color >>= BYTES;
+	}
+
+	color <<= BYTES;
+
+	return color;
 }

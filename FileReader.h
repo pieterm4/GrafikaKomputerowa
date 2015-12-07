@@ -1,26 +1,57 @@
 #ifndef FILEREADER_H_
 #define FILEREADER_H_
 
+#include <cstdint>
 #include <fstream>
 
 class FileReader
 {
 public:
-    FileReader(std::string _fileName);
-    virtual ~FileReader();
-    bool open();
-    void close();
-    bool readAll();
-    uint8_t* getContent();
-    uint32_t getSize();
+	FileReader(const char * const _path);
+	~FileReader();
+	bool open();
+	template <typename T>
+	bool read(T &t);
+	template <typename T>
+	bool read(T &t, uint32_t size);
+	bool goToOffset(uint32_t offset);
+	void close();
+	uint32_t getSize() const;
 
 private:
-    std::fstream file;
-    bool isOpen;
-    std::string fileName;
-    uint32_t size;
-    uint8_t *buffer;
+	const char * const path;
+	uint32_t size;
+	std::ifstream in;
 };
 
-#endif /* FILEREADER_H_ */
+template<typename T>
+bool FileReader::read(T& t)
+{
+	in.read(reinterpret_cast<char *>(&t), sizeof(t));
 
+	if (in.fail() || in.eof())
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+template <typename T>
+bool FileReader::read(T &t, uint32_t size)
+{
+	in.read(reinterpret_cast<char *>(&t), sizeof(t) * size);
+
+	if (in.fail() || in.eof())
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+#endif /* FILEREADER_H_ */

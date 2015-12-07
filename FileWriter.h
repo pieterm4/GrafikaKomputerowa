@@ -2,24 +2,36 @@
 #define FILEWRITER_H_
 
 #include <fstream>
+#include <string>
 
 class FileWriter
 {
 public:
-    FileWriter(std::string _fileName);
-    virtual ~FileWriter();
-    bool open();
-    void close();
-    bool writeAll();
-    void setSize(uint32_t _size);
-    void setBuffer(uint8_t *_buffer);
+	FileWriter(std::string _name);
+	~FileWriter();
+	bool create();
+	template <typename T>
+	bool write(const T &t);
+	void close();
 
 private:
-    std::ofstream file;
-    bool isOpen;
-    std::string fileName;
-    uint32_t size;
-    uint8_t *buffer;
+	std::ofstream out;
+	std::string name;
 };
+
+template<typename T>
+bool FileWriter::write(const T& t)
+{
+	out.write(reinterpret_cast<char *>(&const_cast<T&>(t)), sizeof(t));
+
+	if (out.fail())
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
 
 #endif /* FILEWRITER_H_ */

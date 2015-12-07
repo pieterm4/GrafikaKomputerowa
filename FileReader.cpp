@@ -1,66 +1,69 @@
 #include "FileReader.h"
 
-FileReader::FileReader(std::string _fileName) : isOpen(false), fileName(_fileName), size(0), buffer(nullptr)
+FileReader::FileReader(const char* const _path) : path(_path), size(0)
 {
-    // TODO Auto-generated constructor stub
+
 }
 
 FileReader::~FileReader()
 {
-    if (isOpen)
-    {
-        this->close();
-        isOpen = false;
-        delete [] buffer;
-    }
+	in.close();
 }
 
 bool FileReader::open()
 {
-    file.open(fileName, std::ios_base::binary | std::ios::in);
+	in.open(path, in.in | in.binary);
 
-    if (file.is_open())
-        return isOpen = true;
-    else
-        return isOpen = false;
+	if (!in.is_open())
+	{
+		return false;
+	}
+
+	in.seekg(0, in.end);
+
+	if (in.fail())
+	{
+		return false;
+	}
+
+	size = in.tellg();
+
+	if (in.fail())
+	{
+		return false;
+	}
+
+	in.seekg(0, in.beg);
+
+	if (in.fail())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool FileReader::goToOffset(uint32_t offset)
+{
+	in.seekg(offset, in.beg);
+
+	if (in.fail())
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 void FileReader::close()
 {
-    if (isOpen)
-    {
-        file.close();
-        isOpen = false;
-        delete [] buffer;
-    }
+	in.close();
 }
 
-bool FileReader::readAll()
+uint32_t FileReader::getSize() const
 {
-    if (isOpen)
-    {
-        file.seekg(0, std::ios::end);
-        size = file.tellg();
-        file.seekg(0, std::ios::beg);
-
-        buffer = new  (std::nothrow)  uint8_t[size];
-
-        if ( (file.rdstate() & std::ifstream::failbit ) == 0 && size > 0 && buffer != nullptr)
-            file.read((char*)buffer, size);
-            
-        if (file.gcount() == size && buffer)
-                return true;
-    }
-    return false;
-}
-
-uint8_t* FileReader::getContent()
-{
-    return buffer;
-}
-
-uint32_t FileReader::getSize()
-{
-    return size;
+	return size;
 }
 
