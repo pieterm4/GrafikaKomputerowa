@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 
 	if (method == METHOD_COMRPESS)
 	{
-		uint8_t red[2], green[2], blue[2];
+		uint8_t red[2] = { 0 }, green[2] = { 0 }, blue[2] = { 0 };
 		for (uint32_t y = 0; y < format->getHeight(); y++)
 		{
 			for (uint32_t x = 0; x < format->getWidth(); x++)
