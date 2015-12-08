@@ -13,14 +13,14 @@ public:
 	template <typename T>
 	bool read(T &t);
 	template <typename T>
-	bool read(T &t, uint32_t size);
+	bool read(T &t, uint64_t size);
 	bool goToOffset(uint32_t offset);
 	void close();
-	uint32_t getSize() const;
+	uint64_t getSize() const;
 
 private:
 	const char * const path;
-	uint32_t size;
+	uint64_t size;
 	std::ifstream in;
 };
 
@@ -40,7 +40,7 @@ bool FileReader::read(T& t)
 }
 
 template <typename T>
-bool FileReader::read(T &t, uint32_t size)
+bool FileReader::read(T &t, uint64_t size)
 {
 	in.read(reinterpret_cast<char *>(&t), sizeof(t) * size);
 
