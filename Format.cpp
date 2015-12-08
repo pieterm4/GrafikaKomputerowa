@@ -8,7 +8,7 @@ Format::Format(FileReader& _reader) : BYTES(4), BMP_MAGIC(0x4D42), reader(_reade
 
 Format::~Format()
 {
-
+	delete[] buffer;
 }
 
 uint32_t Format::getWidth() const
