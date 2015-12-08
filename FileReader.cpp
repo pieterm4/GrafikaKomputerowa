@@ -62,7 +62,7 @@ void FileReader::close()
 	in.close();
 }
 
-uint32_t FileReader::getSize() const
+uint64_t FileReader::getSize() const
 {
 	return size;
 }
