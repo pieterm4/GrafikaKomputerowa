@@ -6,23 +6,38 @@
 #include "Format.h"
 #include "BMP.h"
 #include "GK.h"
+#include "Algorithm.h"
+#include "Arithmetic.h"
+#include "LZ77.h"
+#include "Bit4.h"
 
-const static uint8_t BMP_PADDING = 0x00;
-const char * const COMRPESS = "c";
+const char * const COMRPESS_4BIT = "4bit";
+const char * const COMRPESS_LZ77 = "lz77";
+const char * const COMRPESS_ARITHMETIC = "arithmetic";
 const char * const DECOMRPESS = "d";
 const char * const GRAY_SCALE = "s";
-const static uint8_t METHOD_COMRPESS = 1;
-const static uint8_t METHOD_DECOMRPESS = 2;
+const static uint8_t METHOD_DECOMRPESS = 1;
+const static uint8_t METHOD_COMRPESS_4BIT = 2;
+const static uint8_t METHOD_COMRPESS_LZ77 = 3;
+const static uint8_t METHOD_COMRPESS_ARITHMETIC = 4;
+const static uint8_t METHOD_DECOMRPESS_4BIT = 5;
+const static uint8_t METHOD_DECOMRPESS_LZ77 = 6;
+const static uint8_t METHOD_DECOMRPESS_ARITHMETIC = 7;
 const static uint8_t ARGV_METHOD = 1;
 const static uint8_t ARGV_PATH = 2;
 const static uint8_t ARGV_OPTIONAL = 3;
+const static uint32_t BMP_8BIT = 0;
+const static uint32_t BMP_4BIT = 1;
+const static uint32_t BMP_LZ77 = 2;
+const static uint32_t BMP_ARITHMETIC = 3;
 
 int main(int argc, char **argv)
 {
 	if (!(argc == 3 || argc == 4))
 	{
 		std::cerr << "Usage:\n";
-		std::cerr << "To compress: bmp c file s // parameter s can be optional\n";
+        std::cerr << "To compress: bmp <compress method> file s // parameter s can be optional\n";
+        std::cerr << "Available methods: 4bit, lz77, arithmetic\n";
 		std::cerr << "To decompress: bmp d file\n";
 		return 1;
 	}
@@ -30,10 +45,18 @@ int main(int argc, char **argv)
 	uint8_t method = 0;
 	bool grayScale = false;
 
-	if (strcmp(argv[ARGV_METHOD], COMRPESS) == 0)
+    if (strcmp(argv[ARGV_METHOD], COMRPESS_4BIT) == 0)
 	{
-		method = METHOD_COMRPESS;
+        method = METHOD_COMRPESS_4BIT;
 	}
+    else if (strcmp(argv[ARGV_METHOD], COMRPESS_ARITHMETIC) == 0)
+    {
+        method = METHOD_COMRPESS_ARITHMETIC;
+    }
+    else if (strcmp(argv[ARGV_METHOD], COMRPESS_LZ77) == 0)
+    {
+        method = METHOD_COMRPESS_LZ77;
+    }
 	else if (strcmp(argv[ARGV_METHOD], DECOMRPESS) == 0)
 	{
 		method = METHOD_DECOMRPESS;
@@ -45,7 +68,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (method == METHOD_COMRPESS && argc == 4 && (strcmp(argv[ARGV_OPTIONAL], GRAY_SCALE) == 0))
+    if (method != METHOD_DECOMRPESS && argc == 4 && (strcmp(argv[ARGV_OPTIONAL], GRAY_SCALE) == 0))
 	{
 		grayScale = true;
 	}
@@ -60,7 +83,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (method == METHOD_COMRPESS)
+    if (method != METHOD_DECOMRPESS)
 	{
 		format = std::make_unique<BMP>(*reader);
 	}
@@ -75,7 +98,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (method == METHOD_COMRPESS)
+    if (method != METHOD_DECOMRPESS)
 	{
 		writer = std::make_unique<FileWriter>("compressed.bmp");
 	}
@@ -96,13 +119,41 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (method == METHOD_COMRPESS)
+    if (method != METHOD_DECOMRPESS)
 	{
 		format->getBih().biBitCount = format->BYTES;
+
+        if (method == METHOD_COMRPESS_4BIT)
+        {
+            format->getBih().biCompression = BMP_4BIT;
+        }
+        else if (method == METHOD_COMRPESS_ARITHMETIC)
+        {
+            format->getBih().biCompression = BMP_ARITHMETIC;
+        }
+        else if (method == METHOD_COMRPESS_LZ77)
+        {
+            format->getBih().biCompression = BMP_LZ77;
+        }
 	}
-	else if (method == METHOD_DECOMRPESS)
+    else if (method == METHOD_DECOMRPESS)
 	{
 		format->getBih().biBitCount = 24;
+
+        if (format->getBih().biCompression == BMP_4BIT)
+        {
+            method = METHOD_DECOMRPESS_4BIT;
+        }
+        else if (format->getBih().biCompression == BMP_ARITHMETIC)
+        {
+            method = METHOD_DECOMRPESS_ARITHMETIC;
+        }
+        else if (format->getBih().biCompression == BMP_LZ77)
+        {
+            method = METHOD_DECOMRPESS_LZ77;
+        }
+
+        format->getBih().biCompression = BMP_8BIT;
 	}
 
 	if (!writer->write<BITMAPINFOHEADER>(format->getBih()))
@@ -111,131 +162,38 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (method == METHOD_COMRPESS)
-	{
-		uint8_t red[2] = { 0 }, green[2] = { 0 }, blue[2] = { 0 };
-		for (uint32_t y = 0; y < format->getHeight(); y++)
-		{
-			for (uint32_t x = 0; x < format->getWidth(); x++)
-			{
-				if (x % 2 == 0)
-				{
-					red[0] = format->getRed(x, y);
-					green[0] = format->getGreen(x, y);
-					blue[0] = format->getBlue(x, y);
+    std::unique_ptr<Algorithm> alg;
 
-					if (grayScale)
-					{
-						uint8_t gray = (red[0] + green[0] + blue[0]) / 3;
-						red[0] = gray;
-						green[0] = gray;
-						blue[0] = gray;
-					}
-
-					red[0] >>= format->BYTES;
-					green[0] >>= format->BYTES;
-					blue[0] >>= format->BYTES;
-
-					uint8_t data = 0;
-					data |= green[0];
-					data |= (red[0] << format->BYTES);
-
-					if (!writer->write<uint8_t>(data))
-					{
-						std::cerr << "Cannot write to a file\n";
-						return 1;
-					}
-				}
-				else
-				{
-					red[1] = format->getRed(x, y);
-					green[1] = format->getGreen(x, y);
-					blue[1] = format->getBlue(x, y);
-
-					if (grayScale)
-					{
-						uint8_t gray = (red[1] + green[1] + blue[1]) / 3;
-						red[1] = gray;
-						green[1] = gray;
-						blue[1] = gray;
-					}
-
-					red[1] >>= format->BYTES;
-					green[1] >>= format->BYTES;
-					blue[1] >>= format->BYTES;
-
-					uint8_t data = 0;
-					data |= red[1];
-					data |= (blue[0] << format->BYTES);
-
-					if (!writer->write<uint8_t>(data))
-					{
-						std::cerr << "Cannot write to a file\n";
-						return 1;
-					}
-
-					data = 0;
-					data |= blue[1];
-					data |= (green[1] << format->BYTES);
-
-					if (!writer->write<uint8_t>(data))
-					{
-						std::cerr << "Cannot write to a file\n";
-						return 1;
-					}
-				}
-			}
-
-			if (format->getWidth() % 2)
-			{
-				uint8_t data = 0;
-				data |= (blue[0] << format->BYTES);
-
-				if (!writer->write<uint8_t>(data))
-				{
-					std::cerr << "Cannot write to a file\n";
-					return 1;
-				}
-			}
-		}
-	}
-	else if (method == METHOD_DECOMRPESS)
-	{
-		for (uint32_t y = 0; y < format->getHeight(); y++)
-		{
-			for (uint32_t x = 0; x < format->getWidth(); x++)
-			{
-				uint8_t red = format->getRed(x, y);
-				uint8_t green = format->getGreen(x, y);
-				uint8_t blue = format->getBlue(x, y);
-
-				if (!writer->write<uint8_t>(red))
-				{
-					std::cerr << "Cannot write to a file\n";
-					return 1;
-				}
-				if (!writer->write<uint8_t>(green))
-				{
-					std::cerr << "Cannot write to a file\n";
-					return 1;
-				}
-				if (!writer->write<uint8_t>(blue))
-				{
-					std::cerr << "Cannot write to a file\n";
-					return 1;
-				}
-			}
-
-			for (uint32_t i = 0; i < format->getPadding(); i++)
-			{
-				if (!writer->write<uint8_t>(BMP_PADDING))
-				{
-					std::cerr << "Cannot write to a file\n";
-					return 1;
-				}
-			}
-		}
-	}
+    if (method == METHOD_COMRPESS_4BIT)
+    {
+        alg = std::make_unique<Bit4>();
+        alg->compressAndSave(*format, *writer, grayScale);
+    }
+    else if (method == METHOD_COMRPESS_ARITHMETIC)
+    {
+        alg = std::make_unique<Arithmetic>();
+        alg->compressAndSave(*format, *writer, grayScale);
+    }
+    else if (method == METHOD_COMRPESS_LZ77)
+    {
+        alg = std::make_unique<LZ77>();
+        alg->compressAndSave(*format, *writer, grayScale);
+    }
+    else if (method == METHOD_DECOMRPESS_4BIT)
+    {
+        alg = std::make_unique<Bit4>();
+        alg->decompressAndSave(*format, *writer);
+    }
+    else if (method == METHOD_DECOMRPESS_ARITHMETIC)
+    {
+        alg = std::make_unique<Arithmetic>();
+        alg->decompressAndSave(*format, *writer);
+    }
+    else if (method == METHOD_DECOMRPESS_LZ77)
+    {
+        alg = std::make_unique<LZ77>();
+        alg->decompressAndSave(*format, *writer);
+    }
 
 	return 0;
 }

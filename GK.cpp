@@ -31,11 +31,6 @@ bool GK::verify()
 		return false;
 	}
 
-	if (bih.biCompression != BI_RGB)
-	{
-		return false;
-	}
-
 	padding = width % 4;
 
 	if (!reader.goToOffset(bfh.bfOffBits))

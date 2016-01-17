@@ -40,3 +40,8 @@ BITMAPINFOHEADER& Format::getBih()
 {
 	return bih;
 }
+
+int8_t* Format::getBuffer() const
+{
+    return buffer;
+}

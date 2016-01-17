@@ -22,6 +22,7 @@ public:
 	BITMAPINFOHEADER& getBih();
 	const uint8_t BYTES;
 	const WORD BMP_MAGIC;
+    int8_t* getBuffer() const;
 
 protected:
 	FileReader &reader;
