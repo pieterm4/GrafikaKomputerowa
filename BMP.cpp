@@ -53,6 +53,8 @@ bool BMP::verify()
 		bih.biSizeImage = (width * 3 + padding) * height;
 	}
 
+    sizeOfBuffer = bih.biSizeImage;
+
 	buffer = new (std::nothrow) int8_t[bih.biSizeImage];
 
 	if (!buffer)

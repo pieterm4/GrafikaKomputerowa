@@ -38,21 +38,16 @@ bool GK::verify()
 		return false;
 	}
 
-	bih.biSizeImage = width * 3 / 2;
-	if ((width * 3) % 2)
-	{
-		bih.biSizeImage++;
-	}
-	bih.biSizeImage *= height;
+    sizeOfBuffer = reader.getSize() - bfh.bfOffBits;
 
-	buffer = new (std::nothrow) int8_t[bih.biSizeImage];
+    buffer = new (std::nothrow) int8_t[sizeOfBuffer];
 
 	if (!buffer)
 	{
 		return false;
 	}
 
-	if (!reader.read<int8_t>(*buffer, bih.biSizeImage))
+    if (!reader.read<int8_t>(*buffer, sizeOfBuffer))
 	{
 		return false;
 	}

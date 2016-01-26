@@ -18,6 +18,7 @@ public:
 	uint32_t getHeight() const;
 	uint32_t getPadding() const;
 	uint32_t getBytesPerPixel() const;
+    uint32_t getSizeOfBuffer() const;
 	BITMAPFILEHEADER& getBfh();
 	BITMAPINFOHEADER& getBih();
 	const uint8_t BYTES;

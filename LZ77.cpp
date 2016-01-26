@@ -19,7 +19,7 @@ bool LZ77::compressAndSave(Format& format, FileWriter& writer, bool isGrayScale)
 {
 	int8_t *buffer = format.getBuffer();
 
-	int bufferSize = format.getBih().biSizeImage; // zmienilem ci na poprawnie!!
+    int bufferSize = format.getSizeOfBuffer(); // zmienilem ci na poprawnie!!
 
 	for (int i = 0; i < bufferSize; i++)
 	{
@@ -101,7 +101,7 @@ bool LZ77::compressAndSave(Format& format, FileWriter& writer, bool isGrayScale)
 bool LZ77::decompressAndSave(Format& format, FileWriter& writer)
 {
 	int8_t *buffer = format.getBuffer();
-	int bufferSize = format.getBih().biSizeImage; // zmienilem ci na to co ma byc
+    int bufferSize = format.getSizeOfBuffer(); // zmienilem ci na to co ma byc
 	int height = format.getHeight(); // Height of the picture
 	int width = format.getWidth(); // Width of the picture
 

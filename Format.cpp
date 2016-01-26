@@ -31,6 +31,11 @@ uint32_t Format::getBytesPerPixel() const
 	return bytesPerPixel;
 }
 
+uint32_t Format::getSizeOfBuffer() const
+{
+    return sizeOfBuffer;
+}
+
 BITMAPFILEHEADER& Format::getBfh()
 {
 	return bfh;
