@@ -19,7 +19,7 @@ bool LZ77::compressAndSave(Format& format, FileWriter& writer, bool isGrayScale)
 {
 	int8_t *buffer = format.getBuffer();
 
-	int bufferSize = sizeof(buffer);
+	int bufferSize = format.getBih().biSizeImage; // zmienilem ci na poprawnie!!
 
 	for (int i = 0; i < bufferSize; i++)
 	{
@@ -94,14 +94,14 @@ bool LZ77::compressAndSave(Format& format, FileWriter& writer, bool isGrayScale)
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
 bool LZ77::decompressAndSave(Format& format, FileWriter& writer)
 {
 	int8_t *buffer = format.getBuffer();
-	int bufferSize = sizeof(buffer);
+	int bufferSize = format.getBih().biSizeImage; // zmienilem ci na to co ma byc
 	int height = format.getHeight(); // Height of the picture
 	int width = format.getWidth(); // Width of the picture
 
@@ -121,7 +121,7 @@ bool LZ77::decompressAndSave(Format& format, FileWriter& writer)
 		decodedTab[currentPosition++] = buffer[i + 2]; // The last number from 3 quantity
 	}
 
-	for (int i = 0; i < sizeof(decodedTab); i++)
+	for (int i = 0; i < (height * width * 3); i++) // sprawdz sobie czy to tak napewno, bo miales rozmair wskaznika zamiast tablicy pobierany !!!
 	{
 		if (!writer.write<uint8_t>(decodedTab[i]))
 		{
