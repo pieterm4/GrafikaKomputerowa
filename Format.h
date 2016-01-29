@@ -23,13 +23,13 @@ public:
 	BITMAPINFOHEADER& getBih();
 	const uint8_t BYTES;
 	const WORD BMP_MAGIC;
-    int8_t* getBuffer() const;
+    uint8_t* getBuffer() const;
 
 protected:
 	FileReader &reader;
 	uint32_t width, height, padding, bytesPerPixel, sizeOfBuffer;
 	BITMAPFILEHEADER bfh;
 	BITMAPINFOHEADER bih;
-	int8_t *buffer;
+    uint8_t *buffer;
 };
 #endif /* FORMAT_H_ */

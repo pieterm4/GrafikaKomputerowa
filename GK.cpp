@@ -40,14 +40,14 @@ bool GK::verify()
 
     sizeOfBuffer = reader.getSize() - bfh.bfOffBits;
 
-    buffer = new (std::nothrow) int8_t[sizeOfBuffer];
+    buffer = new (std::nothrow) uint8_t[sizeOfBuffer];
 
 	if (!buffer)
 	{
 		return false;
 	}
 
-    if (!reader.read<int8_t>(*buffer, sizeOfBuffer))
+    if (!reader.read<uint8_t>(*buffer, sizeOfBuffer))
 	{
 		return false;
 	}

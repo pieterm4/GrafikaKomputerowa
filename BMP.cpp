@@ -55,14 +55,14 @@ bool BMP::verify()
 
     sizeOfBuffer = bih.biSizeImage;
 
-	buffer = new (std::nothrow) int8_t[bih.biSizeImage];
+    buffer = new (std::nothrow) uint8_t[bih.biSizeImage];
 
 	if (!buffer)
 	{
 		return false;
 	}
 
-	if (!reader.read<int8_t>(*buffer, bih.biSizeImage))
+    if (!reader.read<uint8_t>(*buffer, bih.biSizeImage))
 	{
 		return false;
 	}
