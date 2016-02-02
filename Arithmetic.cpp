@@ -38,12 +38,12 @@ bool Arithmetic::compressAndSave(Format& format, FileWriter& writer, bool isGray
             green >>= format.BYTES;
             blue >>= format.BYTES;
 
-            min += red * pow(prob, 1.0);
+            min += blue * pow(prob, 1.0);
             min += green * pow(prob, 2.0);
-            min += blue * pow(prob, 3.0);
+            min += red * pow(prob, 3.0);
 
             max = min + pow(prob, 3.0);
-            compress = (min + max) / 2;
+            compress = (min + max) / 2.0;
 
             if (!writer.write<double>(compress))
             {
